@@ -1,10 +1,14 @@
-// @todo: Темплейт карточки
+import './pages/index.css';
+import initialCards from "./components/initialCards";
+import enableValidation from "./components/validate";
+import {createCard} from "./components/card";
+import {openModal, closeModal, closePopupOnOverlayClick} from "./components/modal";
+
 const cardTemplate = document.querySelector('#card-template').content;
 
-// @todo: DOM узлы
 const content = document.querySelector('.content')
 const places = content.querySelector('.places__list')
-const cardElement = cardTemplate.querySelector('.card')
+export const cardElement = cardTemplate.querySelector('.card')
 const editButton = content.querySelector('.profile__edit-button');
 const addCardButton = content.querySelector('.profile__add-button');
 const profileTitle = content.querySelector('.profile__title');
@@ -12,7 +16,7 @@ const profileDescription = content.querySelector('.profile__description');
 
 const profilePopup = document.querySelector('.popup_type_edit');
 const cardPopup = document.querySelector('.popup_type_new-card');
-const imagePopup = document.querySelector('.popup_type_image');
+export const imagePopup = document.querySelector('.popup_type_image');
 profilePopup.classList.add('popup_is-animated');
 cardPopup.classList.add('popup_is-animated');
 imagePopup.classList.add('popup_is-animated');
@@ -27,51 +31,14 @@ const cardFormElement = cardPopup.querySelector('.popup__form');
 const cardNameInput = cardFormElement.querySelector('.popup__input_type_card-name');
 const cardURLInput = cardFormElement.querySelector('.popup__input_type_url');
 
-const imageDetail = imagePopup.querySelector('.popup__image');
+export const imageDetail = imagePopup.querySelector('.popup__image');
 const closeImageButton = imagePopup.querySelector('.popup__close');
-const imageCaption = imagePopup.querySelector('.popup__caption');
+export const imageCaption = imagePopup.querySelector('.popup__caption');
 
-function openModal(popup) {
-    popup.classList.add('popup_is-opened');
-}
-
-function closeModal(popup) {
-    popup.classList.remove('popup_is-opened');
-}
-
-
-// @todo: Функция создания карточки
-
-function createCard(name, link, alt) {
-    const card = cardElement.cloneNode(true);
-    const cardImage = card.querySelector('.card__image');
-    const cardTitle = card.querySelector('.card__title');
-    const likeButton = card.querySelector('.card__like-button');
-    const deleteButton = card.querySelector('.card__delete-button');
-
-    cardImage.src = link;
-    cardImage.alt = alt;
-    cardTitle.textContent = name;
-
-    likeButton.addEventListener('click', (evt) => {
-        evt.target.classList.toggle('card__like-button_is-active');
-    })
-    deleteButton.addEventListener('click', () => {
-        card.remove();
-    })
-    cardImage.addEventListener('click', () => {
-        imageDetail.src = link;
-        imageDetail.alt = alt;
-        imageCaption.textContent = name;
-        openModal(imagePopup);
-    })
-    return card;
-}
 
 initialCards.forEach((cardData) => {
     places.append(createCard(cardData.name, cardData.link, cardData.alt));
 })
-
 
 function setProfilePopup() {
     nameInput.value = profileTitle.textContent;
@@ -94,11 +61,7 @@ function handleProfileFormSubmit(evt) {
     closeModal(profilePopup);
 }
 
-editButton.addEventListener('click', () => setProfilePopup());
-addCardButton.addEventListener('click', () => setAddCardPopup());
 
-closeProfileButton.addEventListener('click', () => closeModal(profilePopup));
-closeCardButton.addEventListener('click', () => closeModal(cardPopup));
 
 function handleCardFormSubmit(evt) {
     evt.preventDefault();
@@ -109,8 +72,25 @@ function handleCardFormSubmit(evt) {
     console.log(places)
 }
 
+editButton.addEventListener('click', () => setProfilePopup());
+addCardButton.addEventListener('click', () => setAddCardPopup());
+closeProfileButton.addEventListener('click', () => closeModal(profilePopup));
+closeCardButton.addEventListener('click', () => closeModal(cardPopup));
 profileFormElement.addEventListener('submit', handleProfileFormSubmit);
 cardFormElement.addEventListener('submit', handleCardFormSubmit);
-
 closeImageButton.addEventListener('click', () => closeModal(imagePopup));
 
+document.querySelectorAll('.popup').forEach((popup) => {
+    popup.addEventListener('click', closePopupOnOverlayClick);
+});
+
+const validationSettings = {
+    formSelector: '.popup__form',
+    inputSelector: '.popup__input',
+    submitButtonSelector: '.popup__button',
+    inactiveButtonClass: 'popup__button_disabled',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'popup__error_visible'
+}
+
+enableValidation(validationSettings);
